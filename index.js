@@ -1,6 +1,7 @@
 // Import and require mysql2 and inquirer
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
+const cTable = require('console.table')
 // Connect to database
 const db = mysql.createConnection(
     {
@@ -29,7 +30,7 @@ const prompt = () => {
                 case 'Add Employee':
                     return addEmployee();
                 case 'Update Employee Role':
-                // function 
+                return updateEmployee();
                 case 'View All Roles':
                     return viewRoles();
                 case 'Add Role':
@@ -52,7 +53,7 @@ const viewEmployees = () => {
     LEFT JOIN employee AS m ON e.manager_id = m.id
     ORDER BY e.id;`, function (err, results) {
         if (err) throw err;
-        console.log(results);
+        console.table(results);
         prompt();
     });
 }
@@ -120,11 +121,66 @@ const addEmployee = () => {
     });
 }
 
+// update employee
+const updateEmployee = () => {
+    let employeeList;
+    let roleList;
+
+    db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`, function(err, employeeResults) {
+        if (err) throw err;
+        employeeList = employeeResults.map((result) => {
+            return {
+                name: result.name,
+                value: result.id,
+            }
+        });
+
+        db.query(`SELECT id, title FROM role`, function(err, roleResults) {
+            if (err) throw err;
+            roleList = roleResults.map((result) => {
+                return {
+                    name: result.title,
+                    value: result.id,
+                }
+            });
+
+            inquirer
+                .prompt([
+                    {
+                        name: 'employee',
+                        message: `Which employee's role do you want to update?`,
+                        type: 'list',
+                        choices: employeeList,
+                    },
+                    {
+                        name: 'role',
+                        message: `Which role do you want to assign the employee?`,
+                        type: 'list',
+                        choices: roleList,
+                    },
+                ])
+                .then((answers) => {
+                    const { employee, role } = answers;
+                    // create variable of selected employee
+                    const selectedEmployee = employeeList.find((emp) => emp.value === employee);
+                    const employeeName = selectedEmployee.name;
+
+                    db.query(`UPDATE employee SET role_id = ${role} WHERE id = ${employee};`, function (err, results) {
+                        if (err) throw err;
+                    console.log(`${employeeName} role updated`)
+                    prompt();
+                    })
+                });
+        });
+    });
+};
+
+
 // view all roles with id title and salary
 const viewRoles = () => {
     db.query('SELECT role.id, role.title, role.salary, department.department_name AS department FROM role JOIN department ON role.department_id = department.id ORDER BY role.id;', function (err, results) {
         if (err) throw err;
-        console.log(results);
+        console.table(results);
         prompt();
     })
 }
@@ -176,7 +232,7 @@ const addRole = () => {
 const viewDepartments = () => {
     db.query('SELECT * FROM department', function (err, results) {
         if (err) throw err;
-        console.log(results);
+        console.table(results);
         prompt();
     })
 }
