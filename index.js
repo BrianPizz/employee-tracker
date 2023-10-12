@@ -33,7 +33,7 @@ const prompt = () => {
                 case 'View All Roles':
                     return viewRoles();
                 case 'Add Role':
-                // function 
+                    return addRole();
                 case 'View All Departments':
                     return viewDepartments();
                 case 'Add Department':
@@ -91,4 +91,46 @@ const addDepartment = () => {
         })
 }
 
+// add role
+const addRole = () => {
+    db.query(`SELECT department_name FROM department`, function (err, results) {
+        // create array of departments
+        const departmentChoices = results.map((result) => {
+            return {
+                name: result.department_name,
+                value: result.id
+            };
+        });
+
+        if (err) throw err;
+        inquirer
+            .prompt([{
+                name: 'name',
+                message: 'What is the name of the role?'
+            },
+            {
+                name: 'salary',
+                message: 'What is the salary of the role?',
+                type: 'number'
+            },
+            {
+                name: 'department',
+                message: 'Which department does the role belong to?',
+                type: 'list',
+                choices: departmentChoices
+            }
+            ])
+            .then((answers) => {
+                // pull answer values
+                const { name, salary, department } = answers
+
+                db.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`, [name, salary, department], function (err, results) {
+                    if (err) throw err;
+                    console.log(`${name} role added to database`)
+                    prompt();
+                });
+
+            })
+    })
+}
 prompt();
