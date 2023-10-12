@@ -37,7 +37,7 @@ const prompt = () => {
                 case 'View All Departments':
                     return viewDepartments();
                 case 'Add Department':
-                // function 
+                    return addDepartment();
                 case 'Exit':
                     return process.exit()
             }
@@ -72,6 +72,23 @@ const viewDepartments = () => {
         console.log(results);
         prompt();
     })
+}
+
+// add department
+const addDepartment = () => {
+    inquirer
+        .prompt([{
+            name: 'department',
+            message: 'What is the name of the department?'
+        }])
+        .then((answers) => {
+            const departmentValue = answers.department
+            db.query(`INSERT INTO department (department_name) VALUE (?) ;`, departmentValue, function (err, results) {
+                if (err) throw err;
+                console.log(`Added ${answers.department} to department database`);
+                prompt();
+            })
+        })
 }
 
 prompt();
