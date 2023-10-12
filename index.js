@@ -27,7 +27,7 @@ const prompt = () => {
                 case 'View All Employees':
                     return viewEmployees();
                 case 'Add Employee':
-                // function 
+                    return addEmployee();
                 case 'Update Employee Role':
                 // function 
                 case 'View All Roles':
@@ -49,19 +49,68 @@ const viewEmployees = () => {
     FROM employee AS e
     JOIN role AS r ON e.role_id = r.id 
     JOIN department AS d ON r.department_id = d.id
-    LEFT JOIN employee AS m ON e.manager_id = m.id;`, function (err, results) {
+    LEFT JOIN employee AS m ON e.manager_id = m.id
+    ORDER BY e.id;`, function (err, results) {
         if (err) throw err;
         console.log(results);
         prompt();
-    })
+    });
 }
 
 // Add employee
 const addEmployee = () => {
-    db.query(`SELECT * FROM employee`, function (err, results) {
-        if (err) throw err;
 
-    })
+    db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`, function (err, results) {
+        if (err) throw err;
+        const managerChoices = results.map((result) => {
+            return {
+                name: result.name,
+                value: result.id
+            }
+        });
+
+        db.query(`SELECT * FROM role`, function (err, results) {
+            if (err) throw err;
+            const roleChoices = results.map((result) => {
+                return {
+                    name: result.title,
+                    value: result.id
+                }
+            });
+
+            inquirer
+                .prompt([{
+                    name: 'firstName',
+                    message: `What is the employee's first name?`
+                },
+                {
+                    name: 'lastName',
+                    message: `What is the employee's last name?`
+                },
+                {
+                    name: 'role',
+                    message: `What is the employee's role?`,
+                    type: 'list',
+                    choices: roleChoices
+                },
+                {
+                    name: 'manager',
+                    message: `Who is the employee's manager?`,
+                    type: 'list',
+                    choices: managerChoices
+                }
+                ])
+                .then((answers) => {
+                    const { firstName, lastName, role, manager } = answers;
+
+                    db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUE (?, ?, ?, ?);`, [firstName, lastName, role, manager], function (err, results) {
+                        if (err) throw err;
+                        console.log(`Employee ${firstName} ${lastName} added to the database`)
+                        prompt();
+                    })
+                });
+        });
+    });
 }
 
 // view all roles with id title and salary

@@ -16,7 +16,6 @@ salary DECIMAL NOT NULL,
 department_id INT,
 FOREIGN KEY (department_id)
 REFERENCES department(id)
-ON DELETE SET NULL
 );
 -- Employee table --
 CREATE TABLE employee (
