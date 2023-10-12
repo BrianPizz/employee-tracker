@@ -56,12 +56,63 @@ const viewEmployees = () => {
     })
 }
 
+// Add employee
+const addEmployee = () => {
+    db.query(`SELECT * FROM employee`, function (err, results) {
+        if (err) throw err;
+
+    })
+}
+
 // view all roles with id title and salary
 const viewRoles = () => {
     db.query('SELECT role.id, role.title, role.salary, department.department_name AS department FROM role JOIN department ON role.department_id = department.id ORDER BY role.id;', function (err, results) {
         if (err) throw err;
         console.log(results);
         prompt();
+    })
+}
+
+// add role
+const addRole = () => {
+    db.query(`SELECT * FROM department`, function (err, results) {
+        if (err) throw err;
+        // create array of department table
+        const departmentChoices = results.map((result) => {
+            return {
+                name: result.department_name,
+                value: result.id
+            };
+        });
+
+        inquirer
+            .prompt([{
+                name: 'name',
+                message: 'What is the name of the role?'
+            },
+            {
+                name: 'salary',
+                message: 'What is the salary of the role?',
+                type: 'number'
+            },
+            {
+                name: 'department',
+                message: 'Which department does the role belong to?',
+                type: 'list',
+                choices: departmentChoices
+            }
+            ])
+            .then((answers) => {
+                // pull answer values
+                const { name, salary, department } = answers;
+
+                db.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`, [name, salary, department], function (err, results) {
+                    if (err) throw err;
+                    console.log(`${name} role added to the database`)
+                    prompt();
+                });
+
+            })
     })
 }
 
@@ -91,46 +142,4 @@ const addDepartment = () => {
         })
 }
 
-// add role
-const addRole = () => {
-    db.query(`SELECT department_name FROM department`, function (err, results) {
-        // create array of departments
-        const departmentChoices = results.map((result) => {
-            return {
-                name: result.department_name,
-                value: result.id
-            };
-        });
-
-        if (err) throw err;
-        inquirer
-            .prompt([{
-                name: 'name',
-                message: 'What is the name of the role?'
-            },
-            {
-                name: 'salary',
-                message: 'What is the salary of the role?',
-                type: 'number'
-            },
-            {
-                name: 'department',
-                message: 'Which department does the role belong to?',
-                type: 'list',
-                choices: departmentChoices
-            }
-            ])
-            .then((answers) => {
-                // pull answer values
-                const { name, salary, department } = answers
-
-                db.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`, [name, salary, department], function (err, results) {
-                    if (err) throw err;
-                    console.log(`${name} role added to database`)
-                    prompt();
-                });
-
-            })
-    })
-}
 prompt();
