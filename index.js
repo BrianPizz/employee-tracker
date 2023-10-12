@@ -60,15 +60,22 @@ const viewEmployees = () => {
 // Add employee
 const addEmployee = () => {
 
+    let managerChoices
+    // pull manager names and id
     db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`, function (err, results) {
         if (err) throw err;
-        const managerChoices = results.map((result) => {
+        managerChoices = results.map((result) => {
             return {
                 name: result.name,
                 value: result.id
             }
         });
-
+        // add no manager option
+        managerChoices.push({
+            name: 'none',
+            value: null
+        })
+        // pull roles
         db.query(`SELECT * FROM role`, function (err, results) {
             if (err) throw err;
             const roleChoices = results.map((result) => {
