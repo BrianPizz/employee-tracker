@@ -19,7 +19,7 @@ const prompt = () => {
             type: 'list',
             name: 'options',
             message: 'What would you like to do?',
-            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'Remove Role', 'View All Departments', 'Add Department', 'Exit']
+            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'Remove Role', 'View All Departments', 'Add Department', 'Remove Department', 'Exit']
         }])
         .then((answers) => {
             switch (answers.options) {
@@ -37,12 +37,14 @@ const prompt = () => {
                     return viewRoles();
                 case 'Add Role':
                     return addRole();
-                    case 'Remove Role':
-                        return deleteRole();   
+                case 'Remove Role':
+                    return deleteRole();
                 case 'View All Departments':
                     return viewDepartments();
                 case 'Add Department':
                     return addDepartment();
+                case 'Remove Department':
+                    return deleteDepartment();
                 case 'Exit':
                     return process.exit()
             }
@@ -357,8 +359,8 @@ const viewDepartments = () => {
         if (err) throw err;
         console.table(results);
         prompt();
-    })
-}
+    });
+};
 
 // add department
 const addDepartment = () => {
@@ -373,8 +375,41 @@ const addDepartment = () => {
                 if (err) throw err;
                 console.log(`Added ${answers.department} to department database`);
                 prompt();
-            })
-        })
-}
+            });
+        });
+};
+
+// Delete role
+const deleteDepartment = () => {
+    let departmentChoices
+    db.query(`SELECT * FROM department`, function (err, results) {
+        if (err) throw err;
+        departmentChoices = results.map((result) => {
+            return {
+                name: result.department_name,
+                value: result.id
+            }
+        });
+        inquirer
+            .prompt([{
+                name: 'department',
+                message: `Which department would you like to remove?`,
+                type: 'list',
+                choices: departmentChoices
+            },
+            ])
+            .then((answers) => {
+                const { department } = answers;
+                // create variable of selected employee
+                const selectedDepartment = departmentChoices.find((dep) => dep.value === department);
+                const departmentName = selectedDepartment.name;
+                db.query(`DELETE FROM department WHERE id = ${department};`, function (err, results) {
+                    if (err) throw err;
+                    console.log(`${departmentName} removed from database`)
+                    prompt();
+                })
+            });
+    });
+};
 
 prompt();
