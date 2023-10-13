@@ -19,7 +19,7 @@ const prompt = () => {
             type: 'list',
             name: 'options',
             message: 'What would you like to do?',
-            choices: ['View All Employees', 'View Employees by manager', 'View Employees by department','Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'Remove Role', 'View All Departments', 'Add Department', 'Remove Department', 'Exit']
+            choices: ['View All Employees', 'View Employees by manager', 'View Employees by department', 'Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'Remove Role', 'View All Departments', 'View Department budget', 'Add Department', 'Remove Department', 'Exit']
         }])
         .then((answers) => {
             switch (answers.options) {
@@ -45,6 +45,8 @@ const prompt = () => {
                     return deleteRole();
                 case 'View All Departments':
                     return viewDepartments();
+                case 'View Department budget':
+                    return viewBudget();
                 case 'Add Department':
                     return addDepartment();
                 case 'Remove Department':
@@ -410,6 +412,29 @@ const deleteRole = () => {
 // view all departments
 const viewDepartments = () => {
     db.query('SELECT * FROM department', function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        prompt();
+    });
+};
+
+// view department budget
+const viewBudget = () => {
+    db.query(`SELECT
+    d.department_name AS department,
+    SUM(r.salary) AS total_budget
+FROM
+    department AS d
+INNER JOIN
+    role AS r
+ON
+    d.id = r.department_id
+INNER JOIN
+    employee AS e
+ON
+    r.id = e.role_id
+GROUP BY
+    d.department_name;`, function (err, results) {
         if (err) throw err;
         console.table(results);
         prompt();
