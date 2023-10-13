@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "asciiart-logo": "^0.2.7",
     "console.table": "^0.10.0",
     "dotenv": "^16.3.1",
     "express": "^4.17.1",

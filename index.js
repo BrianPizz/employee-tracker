@@ -1,7 +1,28 @@
-// Import and require inquirer and console table
+// Import and require inquirer, console table, and ASCII art
 const db = require('./config/connection')
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+const logo = require('asciiart-logo');
+const config = require('./package.json');
+
+const init = () => {
+    console.log(
+        logo({
+            name: 'Employee Tracker',
+        font: 'Speed',
+        lineChars: 10,
+        padding: 2,
+        margin: 3,
+        borderColor: 'grey',
+        logoColor: 'bold-green',
+        textColor: 'green',
+        })
+        .emptyLine()
+        .right('version 1.0')
+        .emptyLine()
+        .render()
+    )
+}
 
 const prompt = () => {
     inquirer
@@ -481,4 +502,5 @@ const deleteDepartment = () => {
     });
 };
 
+init();
 prompt();
