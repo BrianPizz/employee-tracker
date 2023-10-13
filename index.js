@@ -6,9 +6,7 @@ const cTable = require('console.table')
 const db = mysql.createConnection(
     {
         host: 'localhost',
-        // MySQL username,
         user: 'root',
-        // TODO: Add MySQL password
         password: 'password',
         database: 'employees_db'
     },
@@ -21,7 +19,7 @@ const prompt = () => {
             type: 'list',
             name: 'options',
             message: 'What would you like to do?',
-            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'Update Employee manager', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Exit']
+            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Exit']
         }])
         .then((answers) => {
             switch (answers.options) {
@@ -33,6 +31,8 @@ const prompt = () => {
                     return updateEmployee();
                 case 'Update Employee manager':
                     return updateManager();
+                case 'Remove an Employee':
+                    return deletEmployee();
                 case 'View All Roles':
                     return viewRoles();
                 case 'Add Role':
@@ -121,7 +121,7 @@ const addEmployee = () => {
                 });
         });
     });
-}
+};
 
 // update employee
 const updateEmployee = () => {
@@ -176,6 +176,7 @@ const updateEmployee = () => {
         });
     });
 };
+
 // update manager
 const updateManager = () => {
     let employeeList;
@@ -189,7 +190,7 @@ const updateManager = () => {
                 value: result.id,
             }
         });
-    // grab employee list for manager prompt
+        // grab employee list for manager prompt
         db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`, function (err, managerResults) {
             if (err) throw err;
             managerList = managerResults.map((result) => {
@@ -228,7 +229,40 @@ const updateManager = () => {
                 });
         });
     });
-}
+};
+
+// Delete employee
+const deletEmployee = () => {
+    let employeeChoices
+    db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`, function (err, results) {
+        if (err) throw err;
+        employeeChoices = results.map((result) => {
+            return {
+                name: result.name,
+                value: result.id
+            }
+        });
+        inquirer
+            .prompt([{
+                name: 'name',
+                message: `Which employee would you like to remove?`,
+                type: 'list',
+                choices: employeeChoices
+            },
+            ])
+            .then((answers) => {
+                const { name } = answers;
+                // create variable of selected employee
+                const selectedEmployee = employeeChoices.find((emp) => emp.value === name);
+                const employeeName = selectedEmployee.name;
+                db.query(`DELETE FROM employee WHERE id = ${name};`, function (err, results) {
+                    if (err) throw err;
+                    console.log(`${employeeName} removed to the database`)
+                    prompt();
+                })
+            });
+    });
+};
 
 // view all roles with id title and salary
 const viewRoles = () => {
