@@ -19,7 +19,7 @@ const prompt = () => {
             type: 'list',
             name: 'options',
             message: 'What would you like to do?',
-            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Exit']
+            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'Remove Role', 'View All Departments', 'Add Department', 'Exit']
         }])
         .then((answers) => {
             switch (answers.options) {
@@ -37,6 +37,8 @@ const prompt = () => {
                     return viewRoles();
                 case 'Add Role':
                     return addRole();
+                    case 'Remove Role':
+                        return deleteRole();   
                 case 'View All Departments':
                     return viewDepartments();
                 case 'Add Department':
@@ -312,9 +314,42 @@ const addRole = () => {
                     prompt();
                 });
 
-            })
-    })
-}
+            });
+    });
+};
+
+// Delete role
+const deleteRole = () => {
+    let roleChoices
+    db.query(`SELECT * FROM role`, function (err, results) {
+        if (err) throw err;
+        roleChoices = results.map((result) => {
+            return {
+                name: result.title,
+                value: result.id
+            }
+        });
+        inquirer
+            .prompt([{
+                name: 'title',
+                message: `Which role would you like to remove?`,
+                type: 'list',
+                choices: roleChoices
+            },
+            ])
+            .then((answers) => {
+                const { title } = answers;
+                // create variable of selected employee
+                const selectedRole = roleChoices.find((role) => role.value === title);
+                const roleName = selectedRole.name;
+                db.query(`DELETE FROM role WHERE id = ${title};`, function (err, results) {
+                    if (err) throw err;
+                    console.log(`${roleName} removed from database`)
+                    prompt();
+                })
+            });
+    });
+};
 
 // view all departments
 const viewDepartments = () => {
