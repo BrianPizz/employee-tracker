@@ -19,12 +19,14 @@ const prompt = () => {
             type: 'list',
             name: 'options',
             message: 'What would you like to do?',
-            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'Remove Role', 'View All Departments', 'Add Department', 'Remove Department', 'Exit']
+            choices: ['View All Employees','View Employees by manager' ,'Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'Remove Role', 'View All Departments', 'Add Department', 'Remove Department', 'Exit']
         }])
         .then((answers) => {
             switch (answers.options) {
                 case 'View All Employees':
                     return viewEmployees();
+                    case 'View Employees by manager':
+                        return managerView();
                 case 'Add Employee':
                     return addEmployee();
                 case 'Update Employee Role':
@@ -63,6 +65,31 @@ const viewEmployees = () => {
         prompt();
     });
 }
+
+// View employees by manager
+const managerView = () => {
+    db.query(`SELECT
+	m.id AS manager_id,
+    CONCAT(m.first_name, ' ', m.last_name) AS manager_name,
+	e.id AS employee_id,
+    CONCAT(e.first_name, ' ', e.last_name) AS employee_name
+FROM
+    employee AS m
+LEFT JOIN
+    employee AS e
+ON
+    m.id = e.manager_id
+WHERE
+    e.manager_id IS NOT NULL
+ORDER BY
+    manager_id, employee_id;
+`, function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        prompt();
+    });
+}
+
 
 // Add employee
 const addEmployee = () => {
@@ -407,7 +434,7 @@ const deleteDepartment = () => {
                     if (err) throw err;
                     console.log(`${departmentName} removed from database`)
                     prompt();
-                })
+                });
             });
     });
 };
