@@ -1,17 +1,7 @@
-// Import and require mysql2 and inquirer
-const mysql = require('mysql2');
+// Import and require inquirer and console table
+const db = require('./config/connection')
 const inquirer = require('inquirer');
-const cTable = require('console.table')
-// Connect to database
-const db = mysql.createConnection(
-    {
-        host: 'localhost',
-        user: 'root',
-        password: 'password',
-        database: 'employees_db'
-    },
-    console.log(`Connected to the books_db database.`)
-);
+const cTable = require('console.table');
 
 const prompt = () => {
     inquirer
