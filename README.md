@@ -21,7 +21,7 @@ To install first install Node.js, clone repository, navigate to root directory, 
 ## Usage
 After installing simply run 'node index.js' to use application
 
-[Video Walkthrough]()
+[Video Walkthrough](https://drive.google.com/file/d/13Md3r-Ww_mkO_6hYL0uI990QPa5PBZjH/view)
 
 ## License
 This application is covered under:
