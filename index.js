@@ -19,14 +19,16 @@ const prompt = () => {
             type: 'list',
             name: 'options',
             message: 'What would you like to do?',
-            choices: ['View All Employees','View Employees by manager' ,'Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'Remove Role', 'View All Departments', 'Add Department', 'Remove Department', 'Exit']
+            choices: ['View All Employees', 'View Employees by manager', 'View Employees by department','Add Employee', 'Update Employee Role', 'Update Employee manager', 'Remove an Employee', 'View All Roles', 'Add Role', 'Remove Role', 'View All Departments', 'Add Department', 'Remove Department', 'Exit']
         }])
         .then((answers) => {
             switch (answers.options) {
                 case 'View All Employees':
                     return viewEmployees();
-                    case 'View Employees by manager':
-                        return managerView();
+                case 'View Employees by manager':
+                    return managerView();
+                case 'View Employees by department':
+                    return departmentView();
                 case 'Add Employee':
                     return addEmployee();
                 case 'Update Employee Role':
@@ -64,7 +66,7 @@ const viewEmployees = () => {
         console.table(results);
         prompt();
     });
-}
+};
 
 // View employees by manager
 const managerView = () => {
@@ -88,8 +90,33 @@ ORDER BY
         console.table(results);
         prompt();
     });
-}
+};
 
+// View employees by department
+const departmentView = () => {
+    db.query(`SELECT
+    d.department_name AS department,
+    e.id AS employee_id,
+    CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+    r.title AS employee_role
+FROM
+    employee AS e
+INNER JOIN
+    role AS r
+ON
+    e.role_id = r.id
+INNER JOIN
+    department AS d
+ON
+    r.department_id = d.id
+ORDER BY
+    department, employee_id;`, function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        prompt();
+    });
+    ;
+}
 
 // Add employee
 const addEmployee = () => {
