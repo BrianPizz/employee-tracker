@@ -36,4 +36,3 @@ Add/Remove/update departments, roles, and employees
 
 For any further questions contact:  
 [GitHub](https://github.com/BrianPizz)  
-[Email](mailto:bpizzimentijr@outlook.com)
